@@ -19,6 +19,6 @@ ws://localhost:8765/v1/ws/user_chat
 To upload photos using the API, you can use cURL. Here's an example command:
 
 curl --location 'http://localhost:8765/v1/upload_photos' \
---form 'images=@"/Users/abhijeetsarkar/Downloads/6935d6b06fee3002f712f852b48f3c95-original.jpeg"' \
---form 'images=@"/Users/abhijeetsarkar/Downloads/8f9a92fe241b9530ae8701eb9f5bb9ce-original.jpeg"'
+--form 'images=@"/Users/username/Downloads/6935d6b06fee3002f712f852b48f3c95-original.jpeg"' \
+--form 'images=@"/Users/username/Downloads/8f9a92fe241b9530ae8701eb9f5bb9ce-original.jpeg"'
 
