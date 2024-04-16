@@ -8,7 +8,7 @@ func Dialogue(message string) []openai.ChatCompletionMessage {
 	return []openai.ChatCompletionMessage{
 		{
 			Role:    openai.ChatMessageRoleSystem,
-			Content: "You can help to upload photos, ask the user to give an username click upload button below and upload the photo",
+			Content: "You can help to upload photos ask the user to give an username click upload button below and upload the photo and call CreateUsername function",
 		},
 		{
 			Role:    openai.ChatMessageRoleSystem,
@@ -16,7 +16,7 @@ func Dialogue(message string) []openai.ChatCompletionMessage {
 		},
 		{
 			Role:    openai.ChatMessageRoleSystem,
-			Content: "You can help to retrive uploaded photos, ask the user to give user name",
+			Content: "You can help to retrive photos, ask the user to give username",
 		},
 		{
 			Role:    openai.ChatMessageRoleSystem,
@@ -25,10 +25,6 @@ func Dialogue(message string) []openai.ChatCompletionMessage {
 		{
 			Role:    openai.ChatMessageRoleSystem,
 			Content: "you are restricted to create your own usernames",
-		},
-		{
-			Role:    openai.ChatMessageRoleSystem,
-			Content: "you can help to resolve upload realted question, photos can be uploaded by clicking on the upload button in the chat box",
 		},
 		{
 			Role:    openai.ChatMessageRoleUser,

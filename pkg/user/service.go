@@ -59,7 +59,7 @@ func (s *Service) UpsertUserRegistration(ctx context.Context, user *User) error 
 func (s *Service) FetchUserByUsername(ctx context.Context, username string) (*User, error) {
 	return s.Repo.fetchUserByUsername(ctx, username)
 }
-func (s *Service) UserUploadPhoto(ctx context.Context, user *UserImages, file multipart.File, fileName, contentType string, sess *session.Session) error {
+func (s *Service) UserUploadPhoto(ctx context.Context, user UserImages, file multipart.File, fileName, contentType string, sess *session.Session) error {
 	uploader := s3manager.NewUploader(sess)
 	up, err := uploader.Upload(&s3manager.UploadInput{
 		Bucket: aws.String(s.s3Config.Bucket),
@@ -110,10 +110,10 @@ func (s *Service) ProcessMessage(ctx context.Context, message string) (string, e
 
 		var toolResp string
 		switch call.Function.Name {
-		case "FetchPhotos":
-			toolResp = fmt.Sprint(s.FetchPhotos(user))
 		case "CreateUsername":
 			toolResp = s.CreateUsername(user)
+		case "FetchPhotos":
+			toolResp = fmt.Sprint(s.FetchPhotos(user))
 		default:
 			return "", fmt.Errorf("unsupported tool call: %s", call.Function.Name)
 		}
@@ -151,7 +151,7 @@ func (s *Service) RetrievePhotos(ctx context.Context, username string) ([]string
 	userImages, err := s.Repo.retrievePhotos(ctx, user.ID)
 	if err != nil {
 		if err == _pg.ErrNoRows {
-			return []string{"photos not found , please upload new photos by clicking on the upload button in chatbox"}, nil
+			return []string{"photos not found ask to upload photos"}, nil
 		}
 		return nil, err
 	}
@@ -169,7 +169,7 @@ func (s *Service) CustomFunctionOpenAiParams() []openai.Tool {
 	}
 	createUsernameFunction := openai.FunctionDefinition{
 		Name:        "CreateUsername",
-		Description: "creates a new username",
+		Description: "creates or for uploding photos this will be used ",
 		Parameters: jsonschema.Definition{
 			Type:       jsonschema.Object,
 			Properties: map[string]jsonschema.Definition{"username": usernameParam},

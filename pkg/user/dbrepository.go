@@ -11,7 +11,7 @@ import (
 type Repository interface {
 	upsertUserRegistration(context.Context, *User) error
 	fetchUserByUsername(context.Context, string) (*User, error)
-	userUploadPhoto(context.Context, *UserImages) error
+	userUploadPhoto(context.Context, UserImages) error
 	retrievePhotos(context.Context, int) ([]UserImages, error)
 }
 
@@ -66,8 +66,8 @@ func (r *PGRepo) fetchUserByUsername(dCtx context.Context, username string) (res
 	return res, err
 }
 
-func (r *PGRepo) userUploadPhoto(ctx context.Context, userImages *UserImages) error {
-	_, err := r.db.ModelContext(ctx, userImages).Insert()
+func (r *PGRepo) userUploadPhoto(ctx context.Context, userImages UserImages) error {
+	_, err := r.db.ModelContext(ctx, &userImages).Insert()
 	return err
 }
 func (r *PGRepo) retrievePhotos(ctx context.Context, userID int) ([]UserImages, error) {

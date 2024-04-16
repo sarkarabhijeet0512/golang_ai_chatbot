@@ -106,6 +106,7 @@ func createSchema(db *pg.DB) error {
 	models := []interface{}{
 
 		(*user.User)(nil),
+		(*user.UserImages)(nil),
 	}
 
 	for _, model := range models {

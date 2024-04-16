@@ -5,7 +5,6 @@ import (
 	"fmt"
 	"log"
 	"uber_fx_init_folder_structure/er"
-	"uber_fx_init_folder_structure/utils/bot"
 	model "uber_fx_init_folder_structure/utils/models"
 
 	"net/http"
@@ -25,6 +24,7 @@ type UserHandler struct {
 	cacheService *cache.Service
 }
 
+var messageChan = make(chan string)
 var upgrader = websocket.Upgrader{
 	ReadBufferSize:  1024,
 	WriteBufferSize: 1024,
@@ -97,6 +97,14 @@ func (h *UserHandler) ChatWithBot(c *gin.Context) {
 	defer conn.Close()
 
 	for {
+		go func() {
+			for msg := range messageChan {
+				if err := conn.WriteMessage(websocket.TextMessage, []byte(msg)); err != nil {
+					log.Printf("Error writing message to WebSocket: %v", err)
+					break
+				}
+			}
+		}()
 		// Read message from WebSocket client
 		_, msg, err := conn.ReadMessage()
 		if err != nil {
@@ -114,10 +122,6 @@ func (h *UserHandler) ChatWithBot(c *gin.Context) {
 			log.Printf("Error writing message to WebSocket: %v", err)
 			break
 		}
-		if err := conn.WriteJSON(<-bot.MessageChan); err != nil {
-			log.Printf("Error writing message to WebSocket: %v", err)
-			break
-		}
 	}
 }
 
@@ -125,7 +129,7 @@ func (h *UserHandler) UserUploadPhoto(c *gin.Context) {
 	var (
 		err  error
 		res  = model.GenericRes{}
-		req  = &user.UserImages{}
+		req  = user.UserImages{}
 		dCtx = context.Background()
 	)
 	defer func() {
@@ -137,9 +141,10 @@ func (h *UserHandler) UserUploadPhoto(c *gin.Context) {
 	}()
 
 	username := ""
-	err = h.cacheService.Get("username", username)
+	err = h.cacheService.Get("username", &username)
 	if err != nil {
-		bot.MessageChan <- "Please enter username in the chatbox to proceed!!"
+		go h.SendMessageToSocket("Please enter username in the chatbox to proceed!!")
+		err = er.New(err, er.UserNotFound).SetStatus(http.StatusBadRequest)
 		return
 	}
 
@@ -155,8 +160,13 @@ func (h *UserHandler) UserUploadPhoto(c *gin.Context) {
 		err = er.New(err, er.UncaughtException).SetStatus(http.StatusBadRequest)
 		return
 	}
-	req = &user.UserImages{
-		UserID: req.UserID,
+	userDetails, err := h.userService.FetchUserByUsername(dCtx, username)
+	if err != nil {
+		err = er.New(err, er.UncaughtException).SetStatus(http.StatusBadRequest)
+		return
+	}
+	req = user.UserImages{
+		UserID: userDetails.ID,
 	}
 	files := form.File["images"]
 	for _, file := range files {
@@ -175,11 +185,15 @@ func (h *UserHandler) UserUploadPhoto(c *gin.Context) {
 			return
 		}
 		fmt.Printf("Uploaded file: %s\n", filename)
-		bot.MessageChan <- filename + "  uploaded successfully"
+		go h.SendMessageToSocket("uploaded successfully", filename)
 	}
 
 	res.Message = "uploaded successfully"
 	res.Success = true
 	res.Data = req
 	c.JSON(http.StatusOK, res)
+}
+
+func (h *UserHandler) SendMessageToSocket(message string, file ...string) {
+	messageChan <- fmt.Sprint(file, " ", message)
 }
