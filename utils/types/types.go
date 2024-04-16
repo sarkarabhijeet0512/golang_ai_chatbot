@@ -1,0 +1,8 @@
+package types
+
+const (
+	PRODUCTMANAGEMENT = 1
+	USERMANAGEMENT    = 2
+	REVIEWMANAGEMENT  = 3
+	ORDERMANGEMENT    = 4
+)
