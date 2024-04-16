@@ -86,11 +86,12 @@ func (s *Service) ProcessMessage(ctx context.Context, message string) (string, e
 
 	dialogue := bot.Dialogue(message)
 	resp, err := client.CreateChatCompletion(ctx, openai.ChatCompletionRequest{
-		Model:       openai.GPT3Dot5Turbo,
-		MaxTokens:   50,
+		Model: openai.GPT3Dot5Turbo,
+		// MaxTokens:   50,
 		Messages:    dialogue,
-		Temperature: 0.1,
+		Temperature: 2,
 		Tools:       t,
+		TopP:        0.01,
 	})
 	if err != nil || len(resp.Choices) != 1 {
 		return "", fmt.Errorf("completion error: %v len(choices): %v", err, len(resp.Choices))
@@ -165,11 +166,11 @@ func (s *Service) RetrievePhotos(ctx context.Context, username string) ([]string
 func (s *Service) CustomFunctionOpenAiParams() []openai.Tool {
 	usernameParam := jsonschema.Definition{
 		Type:        jsonschema.String,
-		Description: "the username, e.g., Abhi0512",
+		Description: "the username is  e.g., user0512",
 	}
 	createUsernameFunction := openai.FunctionDefinition{
 		Name:        "CreateUsername",
-		Description: "creates or for uploding photos this will be used ",
+		Description: "creates or for uploding photos this will be used",
 		Parameters: jsonschema.Definition{
 			Type:       jsonschema.Object,
 			Properties: map[string]jsonschema.Definition{"username": usernameParam},
