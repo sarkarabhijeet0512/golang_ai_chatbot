@@ -22,3 +22,7 @@ curl --location 'http://localhost:8765/v1/upload_photos' \
 --form 'images=@"/Users/username/Downloads/6935d6b06fee3002f712f852b48f3c95-original.jpeg"' \
 --form 'images=@"/Users/username/Downloads/8f9a92fe241b9530ae8701eb9f5bb9ce-original.jpeg"'
 
+## Enhancements
+- password protected data passing password with username
+- Implement security best practices such as encryption for sensitive data, rate limiting to prevent abuse, and input validation to mitigate against injection attacks.
+
